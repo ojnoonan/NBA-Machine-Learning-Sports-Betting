@@ -13,12 +13,12 @@ from sbrscrape import Scoreboard
 
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
 
-sportsbook = 'fanduel'
+sportsbook = 'bet365'
 df_data = []
 
-config = toml.load("config.toml")
+config = toml.load("../../config.toml")
 
-con = sqlite3.connect("Data/OddsData.sqlite")
+con = sqlite3.connect("../../Data/OddsData.sqlite")
 
 for key, value in config['get-odds-data'].items():
     date_pointer = datetime.strptime(value['start_date'], "%Y-%m-%d").date()
