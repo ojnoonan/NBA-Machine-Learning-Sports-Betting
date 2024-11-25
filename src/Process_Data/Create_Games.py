@@ -9,6 +9,7 @@ import toml
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
 from src.Utils.Dictionaries import team_index_07, team_index_08, team_index_12, team_index_13, team_index_14, \
     team_index_current
+from src.Process_Data.Get_Player_Data import PlayerDataCollector
 
 config = toml.load("../../config.toml")
 
@@ -42,6 +43,27 @@ for key, value in config['create-games'].items():
             OU.append(row[4])
             days_rest_home.append(row[10])
             days_rest_away.append(row[11])
+            
+            # Get player stats for both teams
+            player_stats_df = pd.read_sql_query(f"select * from \"player_stats_{date}\"", teams_con)
+            if not player_stats_df.empty:
+                home_player_stats = player_stats_df[player_stats_df['HOME_TEAM_ID'] == home_team]
+                away_player_stats = player_stats_df[player_stats_df['AWAY_TEAM_ID'] == away_team]
+                
+                # Add player-level features
+                if not home_player_stats.empty and not away_player_stats.empty:
+                    frame = pd.DataFrame()
+                    frame['HOME_NUM_PLAYERS'] = [home_player_stats['HOME_NUM_PLAYERS'].values[0]]
+                    frame['HOME_TOP_PLAYERS_MIN'] = [home_player_stats['HOME_TOP_PLAYERS_MIN'].values[0]]
+                    frame['HOME_TOP_SCORERS'] = [home_player_stats['HOME_TOP_SCORERS'].values[0]]
+                    frame['HOME_BENCH_SCORING'] = [home_player_stats['HOME_BENCH_SCORING'].values[0]]
+                    frame['HOME_STARTER_EFF'] = [home_player_stats['HOME_STARTER_EFF'].values[0]]
+                    frame['AWAY_NUM_PLAYERS'] = [away_player_stats['AWAY_NUM_PLAYERS'].values[0]]
+                    frame['AWAY_TOP_PLAYERS_MIN'] = [away_player_stats['AWAY_TOP_PLAYERS_MIN'].values[0]]
+                    frame['AWAY_TOP_SCORERS'] = [away_player_stats['AWAY_TOP_SCORERS'].values[0]]
+                    frame['AWAY_BENCH_SCORING'] = [away_player_stats['AWAY_BENCH_SCORING'].values[0]]
+                    frame['AWAY_STARTER_EFF'] = [away_player_stats['AWAY_STARTER_EFF'].values[0]]
+                    
             if row[9] > 0:
                 win_margin.append(1)
             else:
